@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche de Lecture · État de l'Art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #1a1612;
+    --paper:     #f7f4ef;
+    --cream:     #ede8df;
+    --rust:      #b84c2b;
+    --teal:      #2a6b6e;
+    --gold:      #c89b3c;
+    --muted:     #7a7165;
+    --border:    #cfc8bc;
+    --section-1: #2a4a7f;
+    --section-2: #b84c2b;
+    --section-3: #2a6b6e;
+    --section-4: #7b3fa0;
+    --section-5: #2a5fa0;
+    --section-6: #b83030;
+    --section-7: #1f7a6a;
+    --section-8: #555;
+    --radius:    4px;
+    --shadow:    0 2px 12px rgba(26,22,18,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 24px,
+      rgba(255,255,255,0.025) 24px,
+      rgba(255,255,255,0.025) 25px
+    );
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .6rem;
+  }
+  header h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  header p {
+    margin-top: .5rem;
+    font-size: .9rem;
+    color: #aaa59e;
+    font-weight: 300;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: .7rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .progress-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--rust));
+    border-radius: 2px;
+    transition: width .4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  /* ── SECTION CARD ── */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1.4rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s;
+  }
+  .card:focus-within { box-shadow: 0 4px 20px rgba(26,22,18,0.13); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .9rem 1.2rem;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background .15s;
+  }
+  .card-header:hover { background: var(--paper); }
+  .card.open .card-header { border-bottom-color: var(--border); }
+
+  .card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    flex: 1;
+  }
+  .card-toggle {
+    font-size: .8rem;
+    color: var(--muted);
+    transition: transform .25s;
+  }
+  .card.open .card-toggle { transform: rotate(180deg); }
+
+  .card-body {
+    display: none;
+    padding: 1.2rem 1.4rem 1.4rem;
+  }
+  .card.open .card-body { display: block; }
+
+  /* ── COLOR VARIANTS ── */
+  .s1 .card-icon { background: #e8eef7; color: var(--section-1); }
+  .s1 .card-title { color: var(--section-1); }
+  .s2 .card-icon { background: #f8ede8; color: var(--section-2); }
+  .s2 .card-title { color: var(--section-2); }
+  .s3 .card-icon { background: #e6f2f2; color: var(--section-3); }
+  .s3 .card-title { color: var(--section-3); }
+  .s4 .card-icon { background: #f3eaf8; color: var(--section-4); }
+  .s4 .card-title { color: var(--section-4); }
+  .s5 .card-icon { background: #e8eef8; color: var(--section-5); }
+  .s5 .card-title { color: var(--section-5); }
+  .s6 .card-icon { background: #f8e8e8; color: var(--section-6); }
+  .s6 .card-title { color: var(--section-6); }
+  .s7 .card-icon { background: #e6f3f1; color: var(--section-7); }
+  .s7 .card-title { color: var(--section-7); }
+  .s8 .card-icon { background: #efefef; color: var(--section-8); }
+  .s8 .card-title { color: var(--section-8); }
+
+  /* ── FIELDS ── */
+  .field { margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    margin-bottom: .35rem;
+  }
+  label .req { color: var(--rust); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    padding: .55rem .75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .92rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(42,107,110,.12);
+    background: white;
+  }
+  textarea { min-height: 80px; line-height: 1.5; }
+
+  /* grid 2 cols */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* star rating */
+  .stars { display: flex; gap: .4rem; align-items: center; }
+  .star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: var(--border);
+    transition: color .15s, transform .1s;
+    padding: 0;
+    line-height: 1;
+  }
+  .star-btn.active { color: var(--gold); }
+  .star-btn:hover { transform: scale(1.15); }
+  .star-label {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-left: .4rem;
+    font-style: italic;
+  }
+
+  /* ── TABLE BUILDER ── */
+  .table-builder { margin-top: .5rem; }
+  .table-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: .5rem;
+    margin-bottom: .4rem;
+    align-items: center;
+  }
+  .table-row input { margin: 0; }
+  .btn-remove {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .4rem .6rem;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: .85rem;
+    transition: all .15s;
+  }
+  .btn-remove:hover { background: #fee; border-color: var(--rust); color: var(--rust); }
+  .btn-add {
+    margin-top: .5rem;
+    background: none;
+    border: 1px dashed var(--border);
+    padding: .45rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: .82rem;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all .15s;
+    width: 100%;
+  }
+  .btn-add:hover { border-color: var(--teal); color: var(--teal); background: #f0fafa; }
+
+  /* ── FOOTER ACTIONS ── */
+  .actions {
+    position: sticky;
+    bottom: 0;
+    background: var(--ink);
+    padding: 1rem 2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 100;
+  }
+  .actions-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    gap: .8rem;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .btn-reset {
+    background: none;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: .6rem 1.2rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    transition: all .15s;
+  }
+  .btn-reset:hover { border-color: #aaa; color: white; }
+  .btn-download {
+    background: var(--rust);
+    border: none;
+    color: white;
+    padding: .7rem 1.6rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .92rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: background .15s, transform .1s;
+  }
+  .btn-download:hover { background: #9e3e22; transform: translateY(-1px); }
+  .btn-download:active { transform: translateY(0); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--teal);
+    color: white;
+    padding: .7rem 1.4rem;
+    border-radius: 99px;
+    font-size: .85rem;
+    opacity: 0;
+    transition: all .3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── HINT ── */
+  .hint {
+    font-size: .78rem;
+    color: var(--muted);
+    margin-top: .3rem;
+    font-style: italic;
+  }
+  .table-head {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: .5rem;
+    margin-bottom: .3rem;
+  }
+  .table-head span {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow">Journal de recherche</div>
+    <h1>Fiche de Lecture<br><em style="font-weight:400;font-size:.75em;color:#b8b0a4">État de l'Art</em></h1>
+    <p>Remplissez les champs ci-dessous pour générer votre fiche au format LaTeX.</p>
+  </div>
+</header>
+
+<div class="progress-bar">
+  <div class="progress-inner">
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <span class="progress-label" id="progress-label">0 / 0 champs</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- 1. IDENTIFICATION -->
+  <div class="card s1 open" data-section="1">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">🔖</div>
+      <span class="card-title">1 · Identification du papier</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Titre <span class="req">*</span></label>
+        <input type="text" id="titre" placeholder="Titre complet de l'article" oninput="updateProgress()">
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Auteurs <span class="req">*</span></label>
+          <input type="text" id="auteurs" placeholder="Nom1, Nom2, …" oninput="updateProgress()">
+        </div>
+        <div class="field">
+          <label>Année <span class="req">*</span></label>
+          <input type="number" id="annee" placeholder="2024" min="1900" max="2100" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Revue / Conférence</label>
+          <input type="text" id="revue" placeholder="Nature, NeurIPS, ICML…" oninput="updateProgress()">
+        </div>
+        <div class="field">
+          <label>Nombre de citations</label>
+          <input type="number" id="citations" placeholder="342" min="0" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field">
+        <label>DOI / URL</label>
+        <input type="url" id="doi" placeholder="https://doi.org/10.xxxx/xxxxx" oninput="updateProgress()">
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PROBLÉMATIQUE -->
+  <div class="card s2" data-section="2">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">🎯</div>
+      <span class="card-title">2 · Problématique &amp; objectifs</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Question de recherche centrale</label>
+        <textarea id="question" placeholder="Quelle est la question principale que ce papier cherche à résoudre ?" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Hypothèses posées</label>
+        <textarea id="hypotheses" placeholder="Listez les hypothèses de travail…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Contexte et motivation</label>
+        <textarea id="contexte" placeholder="Pourquoi ce problème est-il important ? Quel gap comble-t-il ?" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MÉTHODE -->
+  <div class="card s3" data-section="3">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">🧪</div>
+      <span class="card-title">3 · Méthode</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Type d'étude</label>
+        <select id="type_etude" onchange="updateProgress()">
+          <option value="">— Choisir —</option>
+          <option>Expérimentale</option>
+          <option>Théorique</option>
+          <option>Revue systématique</option>
+          <option>Benchmark</option>
+          <option>Étude de cas</option>
+          <option>Simulation</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Dataset / Corpus</label>
+        <input type="text" id="dataset" placeholder="Nom, taille, source, période…" oninput="updateProgress()">
+      </div>
+      <div class="field">
+        <label>Modèle / Algorithme / Protocole</label>
+        <textarea id="modele" placeholder="Décrivez l'approche méthodologique principale…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Métriques d'évaluation</label>
+        <input type="text" id="metriques" placeholder="Accuracy, F1, BLEU, RMSE…" oninput="updateProgress()">
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. RÉSULTATS -->
+  <div class="card s4" data-section="4">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">📊</div>
+      <span class="card-title">4 · Résultats clés</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Résultats principaux</label>
+        <textarea id="resultats" placeholder="Résumez les résultats les plus importants avec les chiffres clés…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Tableau comparatif (méthode vs baselines)</label>
+        <div class="table-builder">
+          <div class="table-head">
+            <span>Méthode</span>
+            <span>Métrique 1</span>
+            <span>Métrique 2</span>
+            <span></span>
+          </div>
+          <div id="table-rows">
+            <div class="table-row">
+              <input type="text" placeholder="Méthode proposée">
+              <input type="text" placeholder="val.">
+              <input type="text" placeholder="val.">
+              <button class="btn-remove" onclick="removeRow(this)" title="Supprimer">✕</button>
+            </div>
+            <div class="table-row">
+              <input type="text" placeholder="Baseline 1">
+              <input type="text" placeholder="val.">
+              <input type="text" placeholder="val.">
+              <button class="btn-remove" onclick="removeRow(this)" title="Supprimer">✕</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addRow()">+ Ajouter une ligne</button>
+        </div>
+        <p class="hint">Les en-têtes de métriques se remplissent depuis le champ « Métriques d'évaluation ».</p>
+      </div>
+      <div class="field">
+        <label>Figures / tableaux à retenir</label>
+        <input type="text" id="figures" placeholder="ex. Fig. 3 – courbe d'apprentissage, Tab. 2…" oninput="updateProgress()">
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CONTRIBUTIONS -->
+  <div class="card s5" data-section="5">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">💡</div>
+      <span class="card-title">5 · Contributions &amp; apports</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Nouveautés par rapport à l'état de l'art</label>
+        <textarea id="nouveautes" placeholder="Qu'est-ce qui n'existait pas avant ce papier ?" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Concepts / termes clés introduits</label>
+        <input type="text" id="concepts" placeholder="ex. attention mechanism, LoRA, diffusion policy…" oninput="updateProgress()">
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. LIMITES -->
+  <div class="card s6" data-section="6">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">⚠️</div>
+      <span class="card-title">6 · Limites &amp; critiques</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Limites reconnues par les auteurs</label>
+        <textarea id="limites_auteurs" placeholder="Ce que les auteurs eux-mêmes admettent comme limitations…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Limites identifiées personnellement</label>
+        <textarea id="limites_perso" placeholder="Vos propres observations critiques…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Biais potentiels / généralisation</label>
+        <textarea id="biais" placeholder="Biais de sélection, overfitting sur benchmark, manque de diversité…" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. LIENS -->
+  <div class="card s7" data-section="7">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">🔗</div>
+      <span class="card-title">7 · Liens &amp; positionnement</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Papiers cités incontournables</label>
+        <textarea id="papiers_cles" placeholder="Auteur et al. (2023), Nom du papier — raison…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Positionnement par rapport à vos autres lectures</label>
+        <textarea id="positionnement" placeholder="Complète / contredit / étend le travail de…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Courant / famille de recherche</label>
+        <input type="text" id="courant" placeholder="ex. NLP, Vision, RL, GNN, federated learning…" oninput="updateProgress()">
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. NOTES PERSO -->
+  <div class="card s8" data-section="8">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-icon">📝</div>
+      <span class="card-title">8 · Notes personnelles</span>
+      <span class="card-toggle">▾</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Ce que je veux réutiliser</label>
+        <textarea id="reutiliser" placeholder="Méthode à adapter, résultat à citer, code à étudier…" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Questions soulevées</label>
+        <textarea id="questions" placeholder="Quelles nouvelles questions ce papier ouvre-t-il pour vous ?" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field">
+        <label>Pertinence pour mon travail</label>
+        <div class="stars" id="stars">
+          <button class="star-btn" data-v="1" onclick="setStar(1)">★</button>
+          <button class="star-btn" data-v="2" onclick="setStar(2)">★</button>
+          <button class="star-btn" data-v="3" onclick="setStar(3)">★</button>
+          <span class="star-label" id="star-label">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="actions">
+  <div class="actions-inner">
+    <button class="btn-reset" onclick="resetForm()">Réinitialiser</button>
+    <button class="btn-download" onclick="generateLatex()">
+      <span>⬇</span> Télécharger le .tex
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Fichier généré avec succès !</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let starValue = 0;
+
+// ── Toggle card ────────────────────────────────────────────
+function toggleCard(header) {
+  const card = header.closest('.card');
+  card.classList.toggle('open');
+}
+
+// ── Stars ──────────────────────────────────────────────────
+function setStar(v) {
+  starValue = v;
+  const labels = ['Faible', 'Moyenne', 'Haute'];
+  document.getElementById('star-label').textContent = labels[v-1];
+  document.querySelectorAll('.star-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.v) <= v);
+  });
+  updateProgress();
+}
+
+// ── Table rows ─────────────────────────────────────────────
+function addRow() {
+  const row = document.createElement('div');
+  row.className = 'table-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Méthode…">
+    <input type="text" placeholder="val.">
+    <input type="text" placeholder="val.">
+    <button class="btn-remove" onclick="removeRow(this)" title="Supprimer">✕</button>
+  `;
+  document.getElementById('table-rows').appendChild(row);
+}
+function removeRow(btn) {
+  const rows = document.querySelectorAll('#table-rows .table-row');
+  if (rows.length > 1) btn.closest('.table-row').remove();
+}
+
+// ── Progress ───────────────────────────────────────────────
+function updateProgress() {
+  const ids = ['titre','auteurs','annee','revue','citations','doi',
+               'question','hypotheses','contexte',
+               'type_etude','dataset','modele','metriques',
+               'resultats','figures',
+               'nouveautes','concepts',
+               'limites_auteurs','limites_perso','biais',
+               'papiers_cles','positionnement','courant',
+               'reutiliser','questions'];
+  let filled = 0;
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value.trim()) filled++;
+  });
+  if (starValue > 0) filled++;
+  const total = ids.length + 1;
+  const pct = Math.round(filled / total * 100);
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${filled} / ${total} champs`;
+}
+
+// ── LaTeX escape ───────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return str
+    .replace(/\\/g, '\\textbackslash{}')
+    .replace(/&/g, '\\&')
+    .replace(/%/g, '\\%')
+    .replace(/\$/g, '\\$')
+    .replace(/#/g, '\\#')
+    .replace(/_/g, '\\_')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/~/g, '\\textasciitilde{}')
+    .replace(/\^/g, '\\textasciicircum{}')
+    .replace(/\n/g, ' \\\\\n');
+}
+
+function val(id) { return esc(document.getElementById(id)?.value?.trim() || ''); }
+function raw(id) { return document.getElementById(id)?.value?.trim() || ''; }
+
+// ── Build table rows ───────────────────────────────────────
+function buildTableRows() {
+  const rows = document.querySelectorAll('#table-rows .table-row');
+  return Array.from(rows).map(row => {
+    const inputs = row.querySelectorAll('input');
+    const cells = Array.from(inputs).map(i => esc(i.value.trim() || '—'));
+    return `    ${cells.join(' & ')} \\\\`;
+  }).join('\n');
+}
+
+// ── Pertinence ─────────────────────────────────────────────
+function starTex() {
+  const full = '\\fullstar';
+  const empty = '\\emptystar';
+  if (starValue === 0) return '—';
+  return Array.from({length:3}, (_,i) => i < starValue ? full : empty).join('');
+}
+function starLabels() {
+  const l = ['Faible','Moyenne','Haute'];
+  return starValue > 0 ? `~(${l[starValue-1]})` : '';
+}
+
+// ── Metric headers ─────────────────────────────────────────
+function metricHeaders() {
+  const m = raw('metriques');
+  const parts = m ? m.split(',').map(s => s.trim()) : ['Métrique 1','Métrique 2'];
+  return [parts[0] || 'Métrique 1', parts[1] || 'Métrique 2'];
+}
+
+// ── GENERATE LATEX ─────────────────────────────────────────
+function generateLatex() {
+  const [m1, m2] = metricHeaders();
+  const doiRaw = raw('doi');
+  const doiTex = doiRaw ? `\\url{${doiRaw}}` : '—';
+  const citRaw = raw('citations');
+  const dateStr = new Date().toLocaleDateString('fr-FR');
+
+  const tex = `% ============================================================
+%  FICHE DE LECTURE – ÉTAT DE L'ART
+%  Générée le ${dateStr}
+%  Compiler avec : pdflatex fiche_lecture.tex
+% ============================================================
+\\documentclass[a4paper, 11pt]{article}
+
+% ── Encodage & langue ────────────────────────────────────────
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage[french]{babel}
+
+% ── Mise en page ─────────────────────────────────────────────
+\\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2.5cm]{geometry}
+\\usepackage{parskip}
+\\setlength{\\parindent}{0pt}
+
+% ── Typographie ──────────────────────────────────────────────
+\\usepackage{lmodern}
+\\usepackage{microtype}
+
+% ── Couleurs & boîtes ────────────────────────────────────────
+\\usepackage[dvipsnames]{xcolor}
+\\usepackage{tcolorbox}
+\\tcbuselibrary{skins, breakable}
+
+% ── Liens ────────────────────────────────────────────────────
+\\usepackage{hyperref}
+\\hypersetup{colorlinks=true,linkcolor=NavyBlue,urlcolor=NavyBlue}
+
+% ── Tableaux ─────────────────────────────────────────────────
+\\usepackage{booktabs}
+\\usepackage{tabularx}
+
+% ── Étoiles ──────────────────────────────────────────────────
+\\usepackage{wasysym}
+
+% ── En-tête ──────────────────────────────────────────────────
+\\usepackage{fancyhdr}
+\\pagestyle{fancy}
+\\fancyhf{}
+\\rhead{\\textcolor{gray}{\\small Fiche de lecture – État de l'art}}
+\\lhead{\\textcolor{gray}{\\small ${dateStr}}}
+\\cfoot{\\thepage}
+
+% ── Boîtes thématiques ───────────────────────────────────────
+\\newcommand{\\sectionbox}[3]{%
+  \\begin{tcolorbox}[
+    breakable,
+    colback=#1!6,colframe=#1!60,coltitle=white,
+    fonttitle=\\bfseries\\small,title=#2,
+    arc=3pt,left=6pt,right=6pt,top=4pt,bottom=4pt,
+    toptitle=3pt,bottomtitle=3pt,
+    before skip=8pt,after skip=8pt
+  ]#3\\end{tcolorbox}}
+
+\\newcommand{\\champ}[2]{\\textbf{#1 :} #2 \\\\[2pt]}
+
+% ═══════════════════════════════════════════════════════════
+\\begin{document}
+
+\\begin{center}
+  {\\LARGE \\textbf{Fiche de lecture}}\\\\[4pt]
+  {\\large \\textit{État de l'art}}\\\\[2pt]
+  \\textcolor{gray}{\\small Rédigée le : ${dateStr}}
+\\end{center}
+\\vspace{4pt}\\hrule\\vspace{10pt}
+
+% ── 1. Identification ────────────────────────────────────────
+\\sectionbox{NavyBlue}{\\quad Identification du papier}{
+  \\champ{Titre}{${val('titre') || '—'}}
+  \\champ{Auteurs}{${val('auteurs') || '—'}}
+  \\champ{Année}{${esc(raw('annee')) || '—'}}
+  \\champ{Revue / Conférence}{${val('revue') || '—'}}
+  \\champ{Nombre de citations}{${esc(citRaw) || '—'}}
+  \\champ{DOI / URL}{${doiTex}}
+}
+
+% ── 2. Problématique ─────────────────────────────────────────
+\\sectionbox{Bittersweet}{\\quad Problématique \\& objectifs}{
+  \\champ{Question de recherche centrale}{${val('question') || '—'}}
+  \\champ{Hypothèses posées}{${val('hypotheses') || '—'}}
+  \\champ{Contexte et motivation}{${val('contexte') || '—'}}
+}
+
+% ── 3. Méthode ───────────────────────────────────────────────
+\\sectionbox{ForestGreen}{\\quad Méthode}{
+  \\champ{Type d'étude}{${val('type_etude') || '—'}}
+  \\champ{Dataset / Corpus}{${val('dataset') || '—'}}
+  \\champ{Modèle / Algorithme / Protocole}{${val('modele') || '—'}}
+  \\champ{Métriques d'évaluation}{${val('metriques') || '—'}}
+}
+
+% ── 4. Résultats ─────────────────────────────────────────────
+\\sectionbox{Plum}{\\quad Résultats clés}{
+  \\champ{Résultats principaux}{${val('resultats') || '—'}}
+  \\vspace{4pt}
+  \\begin{tabularx}{\\linewidth}{lXX}
+    \\toprule
+    \\textbf{Méthode} & \\textbf{${esc(m1)}} & \\textbf{${esc(m2)}} \\\\
+    \\midrule
+${buildTableRows()}
+    \\bottomrule
+  \\end{tabularx}
+  \\vspace{4pt}
+  \\champ{Figures / tableaux à retenir}{${val('figures') || '—'}}
+}
+
+% ── 5. Contributions ─────────────────────────────────────────
+\\sectionbox{RoyalBlue}{\\quad Contributions \\& apports}{
+  \\champ{Nouveautés par rapport à l'état de l'art}{${val('nouveautes') || '—'}}
+  \\champ{Concepts / termes clés introduits}{${val('concepts') || '—'}}
+}
+
+% ── 6. Limites ───────────────────────────────────────────────
+\\sectionbox{RedOrange}{\\quad Limites \\& critiques}{
+  \\champ{Limites reconnues par les auteurs}{${val('limites_auteurs') || '—'}}
+  \\champ{Limites identifiées personnellement}{${val('limites_perso') || '—'}}
+  \\champ{Biais potentiels / généralisation}{${val('biais') || '—'}}
+}
+
+% ── 7. Liens & positionnement ────────────────────────────────
+\\sectionbox{Teal}{\\quad Liens \\& positionnement}{
+  \\champ{Papiers cités incontournables}{${val('papiers_cles') || '—'}}
+  \\champ{Positionnement par rapport aux autres lectures}{${val('positionnement') || '—'}}
+  \\champ{Courant / famille de recherche}{${val('courant') || '—'}}
+}
+
+% ── 8. Notes personnelles ────────────────────────────────────
+\\sectionbox{Gray}{\\quad Notes personnelles}{
+  \\champ{Ce que je veux réutiliser}{${val('reutiliser') || '—'}}
+  \\champ{Questions soulevées}{${val('questions') || '—'}}
+  \\champ{Pertinence pour mon travail}{${starTex()}${starLabels()}}
+}
+
+\\end{document}
+`;
+
+  // Download
+  const blob = new Blob([tex], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const filename = raw('titre')
+    ? raw('titre').slice(0,40).replace(/[^a-zA-Z0-9]/g,'_').replace(/_+/g,'_') + '.tex'
+    : 'fiche_lecture.tex';
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast();
+}
+
+// ── Toast ──────────────────────────────────────────────────
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Reset ──────────────────────────────────────────────────
+function resetForm() {
+  if (!confirm('Réinitialiser tous les champs ?')) return;
+  document.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
+  setStar(0);
+  starValue = 0;
+  document.getElementById('star-label').textContent = '—';
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+  updateProgress();
+}
+
+// ── Init ───────────────────────────────────────────────────
+updateProgress();
+</script>
+</body>
+</html>
+`;
