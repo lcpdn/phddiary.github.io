@@ -1,1 +1,877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhD - Research Diary Tools - LcPdn</title>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coffee: #3d1a08;
+    --espresso: #6b2f0f;
+    --cream: #fdf3e3;
+    --yellow: #f5c842;
+    --teal: #1a9e8c;
+    --pink: #e84f7b;
+    --ink: #1a1a2e;
+    --paper: #fffdf7;
+  }
 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ───── HERO ───── */
+  .hero {
+    min-height: 100vh;
+    background: var(--cream);
+    background-image:
+      radial-gradient(ellipse at 10% 20%, rgba(245,200,66,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(26,158,140,0.12) 0%, transparent 50%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 2rem;
+    padding: 4rem 8vw;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* notebook lines background */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent, transparent 27px,
+      rgba(26,158,140,0.08) 27px, rgba(26,158,140,0.08) 28px
+    );
+    pointer-events: none;
+  }
+
+  .hero-text {
+    position: relative;
+    z-index: 2;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--coffee);
+    font-weight: 900;
+    font-size: .75rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: .35rem .9rem;
+    border-radius: 2px;
+    margin-bottom: 1.2rem;
+    border: 2px solid var(--coffee);
+    transform: rotate(-1deg);
+  }
+
+  h1 {
+    font-family: 'Abril Fatface', serif;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    color: var(--coffee);
+    margin-bottom: 1.2rem;
+  }
+
+  h1 span {
+    color: var(--teal);
+    display: block;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #5a4433;
+    max-width: 460px;
+    margin-bottom: 2rem;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--coffee);
+    color: var(--cream);
+    font-weight: 900;
+    font-size: 1rem;
+    padding: .85rem 1.8rem;
+    border-radius: 4px;
+    text-decoration: none;
+    border: 3px solid var(--coffee);
+    transition: all .2s;
+    box-shadow: 4px 4px 0 var(--espresso);
+  }
+  .hero-cta:hover {
+    background: var(--yellow);
+    color: var(--coffee);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--espresso);
+  }
+
+  /* ───── ANIMATION THÉSARD ───── */
+  .scene {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    height: 480px;
+  }
+
+  /* DESK */
+  .desk {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 28px;
+    background: #8B5E3C;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 4px 0 #6b4a2a, inset 0 2px 4px rgba(255,255,255,.2);
+  }
+  .desk::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+    background: #a5723f;
+    border-radius: 4px 4px 0 0;
+  }
+
+  /* CHAIR */
+  .chair-back {
+    position: absolute;
+    bottom: 28px; right: 30px;
+    width: 90px; height: 160px;
+    background: #2e4057;
+    border-radius: 8px 8px 0 0;
+    box-shadow: inset 2px 0 6px rgba(0,0,0,.3);
+  }
+  .chair-seat {
+    position: absolute;
+    bottom: 28px; right: 20px;
+    width: 110px; height: 22px;
+    background: #3a5068;
+    border-radius: 4px;
+  }
+
+  /* PAPERS on desk */
+  .paper {
+    position: absolute;
+    bottom: 28px;
+    border-radius: 2px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,.2);
+  }
+  .paper-1 { left: 20px; width: 90px; height: 70px; background: #fff; transform: rotate(-3deg); }
+  .paper-2 { left: 40px; width: 85px; height: 65px; background: #f0f4ff; transform: rotate(2deg); }
+
+  .paper-lines {
+    position: absolute;
+    top: 8px; left: 6px; right: 6px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .line { height: 2px; background: rgba(100,120,200,.25); border-radius: 1px; }
+
+  /* LAPTOP */
+  .laptop-body {
+    position: absolute;
+    bottom: 50px; left: 120px;
+    width: 150px; height: 100px;
+    background: #c8c8c8;
+    border-radius: 6px 6px 0 0;
+    border: 3px solid #999;
+    overflow: hidden;
+  }
+  .laptop-screen {
+    width: 100%; height: 100%;
+    background: #1a1a2e;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 5px;
+    padding: 6px;
+  }
+  .screen-line {
+    height: 3px;
+    background: var(--teal);
+    border-radius: 2px;
+    animation: screenFlicker 3s ease-in-out infinite;
+  }
+  .screen-line:nth-child(1) { width: 80%; animation-delay: 0s; }
+  .screen-line:nth-child(2) { width: 60%; animation-delay: .3s; }
+  .screen-line:nth-child(3) { width: 70%; animation-delay: .6s; }
+  .screen-line:nth-child(4) { width: 40%; animation-delay: .9s; }
+  .screen-cursor {
+    width: 8px; height: 12px;
+    background: var(--yellow);
+    animation: blink .8s steps(1) infinite;
+    align-self: flex-start;
+    margin-left: 20%;
+  }
+  .laptop-base {
+    position: absolute;
+    bottom: 28px; left: 100px;
+    width: 190px; height: 14px;
+    background: #b0b0b0;
+    border-radius: 0 0 6px 6px;
+    border: 2px solid #999;
+  }
+
+  /* COFFEE CUP */
+  .cup {
+    position: absolute;
+    bottom: 42px; right: 80px;
+  }
+  .cup-body {
+    width: 36px; height: 32px;
+    background: #fff;
+    border: 3px solid #ccc;
+    border-radius: 0 0 10px 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cup-fill {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: #6b2f0f;
+    animation: drinkCoffee 4s ease-in-out infinite alternate;
+  }
+  .cup-handle {
+    position: absolute;
+    right: -12px; top: 6px;
+    width: 14px; height: 16px;
+    border: 3px solid #ccc;
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+  }
+  .cup-saucer {
+    width: 46px; height: 8px;
+    background: #ddd;
+    border-radius: 50%;
+    margin-top: -1px;
+  }
+  .steam {
+    position: absolute;
+    bottom: 73px; right: 84px;
+    display: flex; gap: 5px;
+  }
+  .steam-puff {
+    width: 6px;
+    border-radius: 50%;
+    background: rgba(200,200,200,.7);
+    animation: steamRise 1.5s ease-out infinite;
+  }
+  .steam-puff:nth-child(1) { height: 18px; animation-delay: 0s; }
+  .steam-puff:nth-child(2) { height: 24px; animation-delay: .3s; }
+  .steam-puff:nth-child(3) { height: 16px; animation-delay: .6s; }
+
+  /* EXTRA COFFEE CUPS (the "abuse" part) */
+  .extra-cup {
+    position: absolute;
+    bottom: 28px;
+  }
+  .mini-cup {
+    width: 22px; height: 20px;
+    background: #fff8f0;
+    border: 2px solid #ccc;
+    border-radius: 0 0 6px 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mini-fill { position: absolute; bottom: 0; left: 0; right: 0; background: #3d1a08; height: 60%; }
+  .mini-saucer { width: 28px; height: 5px; background: #ddd; border-radius: 50%; margin-top: -1px; }
+  .cup-stack1 { left: 15px; }
+  .cup-stack2 { left: 48px; transform: rotate(5deg); }
+  .cup-stack3 { left: 78px; transform: rotate(-4deg); }
+
+  /* PERSON */
+  .person {
+    position: absolute;
+    bottom: 28px;
+    right: 35px;
+    animation: sitBounce 2.5s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  /* body/torso */
+  .torso {
+    width: 60px; height: 80px;
+    background: #e84f7b;
+    border-radius: 8px 8px 4px 4px;
+    position: relative;
+    margin: 0 auto;
+  }
+  .torso::after {
+    content: '☕';
+    font-size: 1.3rem;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* arms */
+  .arm {
+    position: absolute;
+    top: 20px;
+    width: 14px; height: 65px;
+    background: #e84f7b;
+    border-radius: 8px;
+  }
+  .arm-left { left: -10px; transform: rotate(30deg); transform-origin: top center; }
+  .arm-right {
+    right: -10px;
+    transform: rotate(-30deg);
+    transform-origin: top center;
+    animation: sip 2.5s ease-in-out infinite;
+  }
+
+  /* head */
+  .head {
+    width: 56px; height: 58px;
+    background: #f5c5a3;
+    border-radius: 50% 50% 48% 48%;
+    margin: 0 auto;
+    position: relative;
+  }
+  /* hair */
+  .head::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: -4px; right: -4px;
+    height: 30px;
+    background: #3d1a08;
+    border-radius: 50% 50% 0 0;
+  }
+  /* glasses */
+  .glasses {
+    position: absolute;
+    top: 22px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 2px; align-items: center;
+  }
+  .lens {
+    width: 16px; height: 12px;
+    border: 2.5px solid #333;
+    border-radius: 4px;
+    background: rgba(200,240,255,.4);
+  }
+  .bridge { width: 5px; height: 2px; background: #333; border-radius: 2px; }
+  /* eyes */
+  .eyes {
+    position: absolute;
+    top: 26px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 12px;
+  }
+  .eye {
+    width: 6px; height: 6px;
+    background: #333;
+    border-radius: 50%;
+    animation: eyeTwitch 3s ease-in-out infinite;
+  }
+  /* mouth */
+  .mouth {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 16px; height: 6px;
+    border: 2px solid #c07060;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+  }
+  /* dark circles */
+  .dark-circle {
+    position: absolute;
+    width: 12px; height: 5px;
+    background: rgba(100,60,60,.2);
+    border-radius: 50%;
+  }
+  .dark-circle-l { top: 32px; left: 8px; }
+  .dark-circle-r { top: 32px; right: 8px; }
+
+  /* legs */
+  .legs { display: flex; gap: 12px; justify-content: center; }
+  .leg {
+    width: 18px; height: 70px;
+    background: #2e4057;
+    border-radius: 0 0 6px 6px;
+  }
+
+  /* ZZZ stress bubbles */
+  .stress-bubble {
+    position: absolute;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--yellow);
+    text-shadow: 0 0 6px rgba(245,200,66,.6);
+    animation: floatUp 2s ease-out infinite;
+  }
+  .stress-bubble:nth-child(1) { top: 20px; right: -30px; animation-delay: 0s; }
+  .stress-bubble:nth-child(2) { top: 0px; right: 20px; animation-delay: .7s; font-size: .8rem; }
+  .stress-bubble:nth-child(3) { top: 10px; right: -10px; animation-delay: 1.4s; font-size: 1.2rem; }
+
+  /* ───── TOOLS SECTION ───── */
+  .tools {
+    padding: 6rem 8vw;
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .tools::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 50%, rgba(26,158,140,.15) 0%, transparent 40%),
+                      radial-gradient(circle at 80% 50%, rgba(232,79,123,.1) 0%, transparent 40%);
+  }
+
+  .tools-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+    z-index: 2;
+  }
+  .tools-header h2 {
+    font-family: 'Abril Fatface', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--cream);
+    margin-bottom: .8rem;
+  }
+  .tools-header p {
+    color: #a0968a;
+    font-size: 1.05rem;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .tool-card {
+    background: rgba(255,255,255,.04);
+    border: 2px solid rgba(255,255,255,.1);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--cream);
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .3s;
+    border-radius: 10px;
+  }
+
+  .tool-card.books::before {
+    background: linear-gradient(135deg, rgba(26,158,140,.2), rgba(26,158,140,.05));
+  }
+  .tool-card.agenda::before {
+    background: linear-gradient(135deg, rgba(232,79,123,.2), rgba(232,79,123,.05));
+  }
+
+  .tool-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255,255,255,.3);
+    box-shadow: 0 20px 40px rgba(0,0,0,.4);
+  }
+  .tool-card:hover::before { opacity: 1; }
+  .tool-card.books:hover { border-color: var(--teal); }
+  .tool-card.agenda:hover { border-color: var(--pink); }
+
+  .tool-icon {
+    font-size: 5rem;
+    display: block;
+    margin: 0 auto 1.5rem;
+    animation: iconWobble 3s ease-in-out infinite;
+    position: relative;
+  }
+  .tool-card.agenda .tool-icon { animation-delay: .5s; }
+
+  /* book stack SVG */
+  .books-scene, .agenda-scene {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    display: block;
+  }
+
+  .tool-card h3 {
+    font-family: 'Abril Fatface', serif;
+    font-size: 1.6rem;
+    margin-bottom: .8rem;
+  }
+  .tool-card.books h3 { color: #5ee8d4; }
+  .tool-card.agenda h3 { color: #f49aba; }
+
+  .tool-card p {
+    font-size: .95rem;
+    line-height: 1.7;
+    color: #a0968a;
+    margin-bottom: 1.8rem;
+  }
+
+  .tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .7rem 1.6rem;
+    border-radius: 4px;
+    font-weight: 900;
+    font-size: .9rem;
+    transition: all .2s;
+    border: 2px solid;
+  }
+  .tool-card.books .tool-btn {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+  }
+  .tool-card.agenda .tool-btn {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #fff;
+  }
+  .tool-card:hover .tool-btn {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 900;
+    padding: .25rem .6rem;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+  }
+  .books .tag { background: rgba(26,158,140,.2); color: #5ee8d4; border: 1px solid rgba(26,158,140,.4); }
+  .agenda .tag { background: rgba(232,79,123,.2); color: #f49aba; border: 1px solid rgba(232,79,123,.4); }
+
+  /* ───── FOOTER ───── */
+  footer {
+    background: var(--coffee);
+    color: rgba(255,255,255,.5);
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .85rem;
+  }
+  footer strong { color: var(--yellow); }
+
+  /* ───── ANIMATIONS ───── */
+  @keyframes sitBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  @keyframes sip {
+    0%, 100% { transform: rotate(-30deg); }
+    30%, 40% { transform: rotate(-60deg) translateY(-5px); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes eyeTwitch {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(.1); }
+  }
+  @keyframes steamRise {
+    0% { opacity: .8; transform: translateY(0) scaleX(1); }
+    100% { opacity: 0; transform: translateY(-20px) scaleX(2); }
+  }
+  @keyframes drinkCoffee {
+    0% { height: 80%; }
+    100% { height: 20%; }
+  }
+  @keyframes screenFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .7; }
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(.8); }
+  }
+  @keyframes iconWobble {
+    0%, 100% { transform: rotate(-3deg) scale(1); }
+    50% { transform: rotate(3deg) scale(1.05); }
+  }
+  @keyframes bookFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes postItFlutter {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  /* ───── RESPONSIVE ───── */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; padding: 3rem 6vw; text-align: center; }
+    .hero-subtitle { margin: 0 auto 2rem; }
+    .scene { height: 360px; max-width: 320px; }
+    .tools { padding: 4rem 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="badge">🎓 Outils de suivi pour thésard fainéant</div>
+    <h1>Histoire de ne pas <span>tout faire<br>à la main.</span></h1>
+    <p class="hero-subtitle">
+      Quand le 4ᵉ café n'aide plus, que le LaTeX rend fou,
+      génère les fiches de lecture et comptes-rendus grâce aux modèles tout faits.
+      Toi, repose-toi (un peu).
+    </p>
+    <a href="#outils" class="hero-cta">
+      ↓ Voir les outils
+    </a>
+  </div>
+
+  <!-- ═ ANIMATION THÉSARD ═ -->
+  <div class="scene" aria-label="Animation d'un thésard qui boit du café">
+
+    <!-- papers on desk -->
+    <div class="paper paper-1">
+      <div class="paper-lines">
+        <div class="line"></div><div class="line"></div><div class="line"></div>
+        <div class="line"></div><div class="line"></div>
+      </div>
+    </div>
+    <div class="paper paper-2">
+      <div class="paper-lines">
+        <div class="line"></div><div class="line"></div><div class="line"></div>
+      </div>
+    </div>
+
+    <!-- laptop -->
+    <div class="laptop-body">
+      <div class="laptop-screen">
+        <div class="screen-line"></div>
+        <div class="screen-line"></div>
+        <div class="screen-line"></div>
+        <div class="screen-line"></div>
+        <div class="screen-cursor"></div>
+      </div>
+    </div>
+    <div class="laptop-base"></div>
+
+    <!-- extra cups (coffee abuse!) -->
+    <div class="extra-cup cup-stack1">
+      <div class="mini-cup"><div class="mini-fill"></div></div>
+      <div class="mini-saucer"></div>
+    </div>
+    <div class="extra-cup cup-stack2">
+      <div class="mini-cup"><div class="mini-fill"></div></div>
+      <div class="mini-saucer"></div>
+    </div>
+    <div class="extra-cup cup-stack3">
+      <div class="mini-cup"><div class="mini-fill"></div></div>
+      <div class="mini-saucer"></div>
+    </div>
+
+    <!-- main coffee cup with steam -->
+    <div class="steam">
+      <div class="steam-puff"></div>
+      <div class="steam-puff"></div>
+      <div class="steam-puff"></div>
+    </div>
+    <div class="cup">
+      <div class="cup-body">
+        <div class="cup-fill" style="height:70%"></div>
+        <div class="cup-handle"></div>
+      </div>
+      <div class="cup-saucer"></div>
+    </div>
+
+    <!-- chair -->
+    <div class="chair-back"></div>
+    <div class="chair-seat"></div>
+
+    <!-- person -->
+    <div class="person">
+      <!-- stress bubbles -->
+      <div class="stress-bubble">☕</div>
+      <div class="stress-bubble">💀</div>
+      <div class="stress-bubble">📚</div>
+
+      <!-- head -->
+      <div class="head">
+        <div class="glasses">
+          <div class="lens"></div>
+          <div class="bridge"></div>
+          <div class="lens"></div>
+        </div>
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+        <div class="dark-circle dark-circle-l"></div>
+        <div class="dark-circle dark-circle-r"></div>
+        <div class="mouth"></div>
+      </div>
+
+      <!-- torso + arms -->
+      <div style="position:relative; width:60px; margin:0 auto;">
+        <div class="arm arm-left"></div>
+        <div class="torso"></div>
+        <div class="arm arm-right"></div>
+      </div>
+
+      <!-- legs -->
+      <div class="legs">
+        <div class="leg"></div>
+        <div class="leg"></div>
+      </div>
+    </div>
+
+    <!-- desk surface -->
+    <div class="desk"></div>
+
+  </div>
+</section>
+
+<!-- ═══════════ TOOLS SECTION ═══════════ -->
+<section class="tools" id="outils">
+  <div class="tools-header">
+    <h2>Deux outils, mille heures économisées.</h2>
+    <p>Des modèles sympas · Prêts en quelques secondes</p>
+  </div>
+
+  <div class="tools-grid">
+
+    <!-- OUTIL 1 : FICHES DE LECTURE -->
+    <a href="./biblio.html" class="tool-card books">
+      <div class="tag">📖 Lecture</div>
+
+      <!-- animated book stack SVG -->
+      <svg class="books-scene" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- book 4 (bottom) -->
+        <g style="animation: bookFloat 3.2s ease-in-out infinite; animation-delay:.6s">
+          <rect x="15" y="82" width="90" height="16" rx="3" fill="#c0392b"/>
+          <rect x="15" y="82" width="10" height="16" rx="2" fill="#a93226"/>
+          <rect x="16" y="84" width="8" height="12" rx="1" fill="#e8a09a"/>
+          <line x1="26" y1="82" x2="26" y2="98" stroke="#a93226" stroke-width="1"/>
+        </g>
+        <!-- book 3 -->
+        <g style="animation: bookFloat 2.8s ease-in-out infinite; animation-delay:.3s">
+          <rect x="20" y="66" width="82" height="17" rx="3" fill="#27ae60"/>
+          <rect x="20" y="66" width="10" height="17" rx="2" fill="#1e8449"/>
+          <rect x="21" y="68" width="8" height="13" rx="1" fill="#82e0aa"/>
+          <line x1="31" y1="66" x2="31" y2="83" stroke="#1e8449" stroke-width="1"/>
+        </g>
+        <!-- book 2 -->
+        <g style="animation: bookFloat 3.5s ease-in-out infinite; animation-delay:.9s">
+          <rect x="18" y="49" width="86" height="18" rx="3" fill="#2980b9"/>
+          <rect x="18" y="49" width="10" height="18" rx="2" fill="#1a6b9a"/>
+          <rect x="19" y="51" width="8" height="14" rx="1" fill="#7ec8e3"/>
+          <line x1="29" y1="49" x2="29" y2="67" stroke="#1a6b9a" stroke-width="1"/>
+          <!-- small bookmark -->
+          <rect x="90" y="42" width="6" height="14" rx="1" fill="#e74c3c"/>
+          <polygon points="90,56 96,56 93,60" fill="#e74c3c"/>
+        </g>
+        <!-- book 1 (top) -->
+        <g style="animation: bookFloat 3s ease-in-out infinite; animation-delay:0s">
+          <rect x="22" y="33" width="78" height="17" rx="3" fill="#8e44ad"/>
+          <rect x="22" y="33" width="10" height="17" rx="2" fill="#7d3c98"/>
+          <rect x="23" y="35" width="8" height="13" rx="1" fill="#d2b4de"/>
+          <line x1="33" y1="33" x2="33" y2="50" stroke="#7d3c98" stroke-width="1"/>
+          <!-- title lines on book -->
+          <rect x="38" y="38" width="45" height="2" rx="1" fill="rgba(255,255,255,.5)"/>
+          <rect x="38" y="43" width="30" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+        </g>
+        <!-- sparkle -->
+        <text x="95" y="30" font-size="16" style="animation: floatUp 2s ease-out infinite">✨</text>
+      </svg>
+
+      <h3>Fiche de Lecture</h3>
+      <p>Suis le formulaire dans ton analyse…<br>
+      Obtiens une fiche structurée : résumé, thèse, arguments, mots-clés, critique.</p>
+
+      <span class="tool-btn">Générer ma fiche →</span>
+    </a>
+
+    <!-- OUTIL 2 : COMPTE-RENDU -->
+    <a href="./reunion.html" class="tool-card agenda">
+      <div class="tag">📅 Réunion</div>
+
+      <!-- animated agenda with post-its SVG -->
+      <svg class="agenda-scene" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- agenda body -->
+        <rect x="18" y="15" width="84" height="95" rx="5" fill="#f5f0e8" stroke="#c8b99a" stroke-width="2"/>
+        <!-- spine -->
+        <rect x="18" y="15" width="14" height="95" rx="4" fill="#c8b99a"/>
+        <!-- rings -->
+        <circle cx="25" cy="35" r="5" fill="none" stroke="#888" stroke-width="2.5"/>
+        <circle cx="25" cy="55" r="5" fill="none" stroke="#888" stroke-width="2.5"/>
+        <circle cx="25" cy="75" r="5" fill="none" stroke="#888" stroke-width="2.5"/>
+        <circle cx="25" cy="95" r="5" fill="none" stroke="#888" stroke-width="2.5"/>
+        <!-- lines in agenda -->
+        <line x1="38" y1="38" x2="95" y2="38" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="38" y1="48" x2="88" y2="48" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="38" y1="58" x2="92" y2="58" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="38" y1="68" x2="80" y2="68" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="38" y1="78" x2="90" y2="78" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="38" y1="88" x2="75" y2="88" stroke="#ddd" stroke-width="1.5"/>
+        <!-- header bar -->
+        <rect x="32" y="20" width="66" height="12" rx="2" fill="#e84f7b" opacity=".8"/>
+        <rect x="36" y="23" width="40" height="2" rx="1" fill="rgba(255,255,255,.7)"/>
+        <rect x="36" y="27" width="26" height="2" rx="1" fill="rgba(255,255,255,.5)"/>
+
+        <!-- post-it 1 (yellow) -->
+        <g style="animation: postItFlutter 2.5s ease-in-out infinite">
+          <rect x="62" y="8" width="38" height="32" rx="2" fill="#f5c842" opacity=".95" transform="rotate(8, 81, 24)"/>
+          <line x1="68" y1="18" x2="92" y2="15" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(8,81,24)"/>
+          <line x1="68" y1="24" x2="90" y2="21" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(8,81,24)"/>
+          <line x1="68" y1="30" x2="88" y2="27" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(8,81,24)"/>
+        </g>
+        <!-- post-it 2 (pink) -->
+        <g style="animation: postItFlutter 3s ease-in-out infinite; animation-delay:.4s">
+          <rect x="70" y="50" width="34" height="28" rx="2" fill="#ff9eb5" opacity=".9" transform="rotate(-5, 87, 64)"/>
+          <line x1="75" y1="58" x2="97" y2="56" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(-5,87,64)"/>
+          <line x1="75" y1="64" x2="95" y2="62" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(-5,87,64)"/>
+        </g>
+        <!-- post-it 3 (green) -->
+        <g style="animation: postItFlutter 2.8s ease-in-out infinite; animation-delay:.8s">
+          <rect x="60" y="82" width="36" height="26" rx="2" fill="#7fe0c2" opacity=".9" transform="rotate(4, 78, 95)"/>
+          <line x1="65" y1="90" x2="88" y2="88" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(4,78,95)"/>
+          <line x1="65" y1="96" x2="86" y2="94" stroke="rgba(0,0,0,.2)" stroke-width="1.5" transform="rotate(4,78,95)"/>
+        </g>
+      </svg>
+
+      <h3>Compte-rendu de Réunion</h3>
+      <p>Colle tes notes de réunion selon le formulaire.<br>
+      Obtiens un CR professionnel : décisions, actions, responsables, prochaine étape.</p>
+
+      <span class="tool-btn">Générer mon CR →</span>
+    </a>
+
+  </div>
+</section>
+
+<footer>
+  Fait avec ☕ × ∞ et une dose d'<strong>IA</strong> · Pour tous.
+</footer>
+
+</body>
+</html>
