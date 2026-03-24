@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Générateur de compte-rendu de thèse - LcPdn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #1a3f6f;
+      --blue-mid:   #2a5ba0;
+      --blue-light: #dbeafe;
+      --blue-pale:  #f0f6ff;
+      --green:      #166534;
+      --green-pale: #f0fdf4;
+      --amber:      #92400e;
+      --amber-pale: #fffbeb;
+      --ink:        #1a1a2e;
+      --muted:      #64748b;
+      --border:     #dde3ef;
+      --surface:    #ffffff;
+      --bg:         #f4f7fc;
+      --radius:     10px;
+      --shadow:     0 2px 12px rgba(26,63,111,.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--blue);
+      color: #fff;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 100% 0%, #2a5ba0 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 80% at 0% 100%, #0f2a50 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .header-inner {
+      position: relative;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 32px 40px;
+    }
+    .header-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      margin-bottom: 10px;
+    }
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    header h1 em { font-style: italic; color: #93c5fd; }
+    header p {
+      font-size: .9rem;
+      color: #bfdbfe;
+      max-width: 520px;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      background: var(--blue);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .progress-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .step-tab {
+      font-size: 12px;
+      font-weight: 500;
+      color: #93c5fd;
+      padding: 12px 16px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .step-tab:hover { color: #fff; }
+    .step-tab.active { color: #fff; border-bottom-color: #60a5fa; }
+    .step-tab.done { color: #6ee7b7; }
+    .step-num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+    .step-tab.done .step-num { background: #059669; }
+    .step-tab.active .step-num { background: #2563eb; }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 32px 80px;
+    }
+
+    /* ── PANELS ── */
+    .panel {
+      display: none;
+      animation: fadeIn .25s ease;
+    }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--blue);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .card-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--blue-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ── FORM GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media(max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.span2 { grid-column: span 2; }
+    .field.span3 { grid-column: span 3; }
+    @media(max-width: 600px) { .field.span2, .field.span3 { grid-column: span 1; } }
+
+    label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    label .req { color: #ef4444; margin-left: 2px; }
+
+    input[type=text], input[type=date], textarea, select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fafbfd;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 9px 13px;
+      width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      resize: vertical;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--blue-mid);
+      box-shadow: 0 0 0 3px rgba(42,91,160,.12);
+      background: #fff;
+    }
+    input::placeholder, textarea::placeholder { color: #bbb; }
+    textarea { min-height: 90px; }
+
+    /* ── DYNAMIC LIST ── */
+    .dyn-list { display: flex; flex-direction: column; gap: 10px; }
+    .dyn-item {
+      display: grid;
+      gap: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      position: relative;
+    }
+    .dyn-item .remove-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: none; border: none;
+      color: #e11d48; cursor: pointer;
+      font-size: 16px; line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background .15s;
+    }
+    .dyn-item .remove-btn:hover { background: #fee2e2; }
+    .add-btn {
+      align-self: flex-start;
+      background: var(--blue-pale);
+      color: var(--blue-mid);
+      border: 1.5px dashed var(--blue-mid);
+      border-radius: 7px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      margin-top: 4px;
+    }
+    .add-btn:hover { background: var(--blue-mid); color: #fff; }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.35rem;
+      color: var(--blue);
+      margin: 32px 0 16px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .section-header span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* ── NAVIGATION BUTTONS ── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 28px;
+      gap: 12px;
+    }
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 26px;
+      cursor: pointer;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--blue-mid); color: var(--blue); }
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--blue-mid); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,63,111,.25); }
+    .btn-generate {
+      background: linear-gradient(135deg, #166534, #16a34a);
+      color: #fff;
+      font-size: 15px;
+      padding: 14px 34px;
+    }
+    .btn-generate:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(22,101,52,.3); }
+
+    /* ── PREVIEW ── */
+    .preview-box {
+      background: #111827;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: #e5e7eb;
+      overflow-x: auto;
+      max-height: 480px;
+      overflow-y: auto;
+      white-space: pre;
+      line-height: 1.7;
+    }
+    .preview-box .kw { color: #60a5fa; }
+    .preview-box .cmd { color: #f9a8d4; }
+    .preview-box .arg { color: #86efac; }
+    .preview-box .cmt { color: #6b7280; }
+
+    /* ── SUCCESS BANNER ── */
+    .success-banner {
+      background: var(--green-pale);
+      border: 1.5px solid #bbf7d0;
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .success-icon { font-size: 24px; flex-shrink: 0; }
+    .success-banner h3 { font-size: .95rem; color: var(--green); margin-bottom: 4px; }
+    .success-banner p { font-size: .85rem; color: #15803d; }
+
+    /* ── HELP TEXT ── */
+    .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      background: var(--blue-pale);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: .04em;
+    }
+
+    /* ── CHECKBOX FIELD ── */
+    .check-field {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 4px;
+    }
+    .check-field input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--blue); }
+    .check-field label { text-transform: none; letter-spacing: 0; font-size: 13.5px; font-weight: 400; color: var(--ink); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 640px) {
+      .header-inner { padding: 32px 20px 28px; }
+      main { padding: 20px 16px 60px; }
+      .card { padding: 20px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="header-label">Doctorat · Outil de rédaction</p>
+    <h1>Compte-rendu de<br><em>réunion de thèse</em></h1>
+    <p>Remplissez le formulaire pour générer un fichier <strong>.tex</strong> prêt à compiler, suivant le template standard.</p>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="step-tab active" data-step="0" onclick="goTo(0)">
+      <span class="step-num">1</span> Informations générales
+    </div>
+    <div class="step-tab" data-step="1" onclick="goTo(1)">
+      <span class="step-num">2</span> Participants
+    </div>
+    <div class="step-tab" data-step="2" onclick="goTo(2)">
+      <span class="step-num">3</span> Avancement
+    </div>
+    <div class="step-tab" data-step="3" onclick="goTo(3)">
+      <span class="step-num">4</span> Discussions & Décisions
+    </div>
+    <div class="step-tab" data-step="4" onclick="goTo(4)">
+      <span class="step-num">5</span> Actions & Suite
+    </div>
+    <div class="step-tab" data-step="5" onclick="goTo(5)">
+      <span class="step-num">6</span> Générer
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ═══════════ STEP 0 — Infos générales ═══════════ -->
+  <div class="panel active" id="panel-0">
+    <p class="section-header">Informations générales <span>étape 1 / 6</span></p>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🎓</span> La thèse</div>
+      <div class="grid-2" style="gap:16px">
+        <div class="field span2">
+          <label>Titre provisoire de la thèse <span class="req">*</span></label>
+          <input type="text" id="titreThese" placeholder="Ex. : Analyse computationnelle des réseaux de neurones biologiques…">
+        </div>
+        <div class="field">
+          <label>Nom complet du·de la doctorant·e <span class="req">*</span></label>
+          <input type="text" id="nomDoctorant" placeholder="Prénom NOM">
+        </div>
+        <div class="field">
+          <label>Année de thèse <span class="req">*</span></label>
+          <select id="anneeThese">
+            <option value="1\\textsuperscript{ère}">1ère année</option>
+            <option value="2\\textsuperscript{ème}">2ème année</option>
+            <option value="3\\textsuperscript{ème}">3ème année</option>
+            <option value="4\\textsuperscript{ème}">4ème année (prolongation)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>École doctorale</label>
+          <input type="text" id="ecoleDoctarale" placeholder="Ex. : ED 158 — Cerveau, Cognition, Comportement">
+        </div>
+        <div class="field">
+          <label>Laboratoire / Unité de recherche</label>
+          <input type="text" id="laboratoire" placeholder="Ex. : LIF, CNRS UMR 7279">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">📅</span> La réunion</div>
+      <div class="grid-3" style="gap:16px">
+        <div class="field">
+          <label>Numéro de réunion</label>
+          <input type="text" id="numeroReunion" placeholder="Ex. : 5">
+        </div>
+        <div class="field">
+          <label>Date <span class="req">*</span></label>
+          <input type="date" id="dateReunion">
+        </div>
+        <div class="field">
+          <label>Heure de début</label>
+          <input type="text" id="heureDebut" placeholder="Ex. : 14:00">
+        </div>
+        <div class="field">
+          <label>Heure de fin</label>
+          <input type="text" id="heureFin" placeholder="Ex. : 15:30">
+        </div>
+        <div class="field span2">
+          <label>Lieu / Lien visioconférence</label>
+          <input type="text" id="lieuReunion" placeholder="Ex. : Salle 304, bâtiment A — ou lien Zoom">
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="btn btn-primary" onclick="goTo(1)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 1 — Participants ═══════════ -->
+  <div class="panel" id="panel-1">
+    <p class="section-header">Participants <span>étape 2 / 6</span></p>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">👩‍🏫</span> Encadrement</div>
+      <div class="field" style="margin-bottom:14px">
+        <label>Directeur·rice de thèse <span class="req">*</span></label>
+        <input type="text" id="directeur" placeholder="Prénom NOM — Professeur·e, Université X">
+      </div>
+      <div class="field">
+        <label>Co-encadrant·e(s)</label>
+        <input type="text" id="codirecteur" placeholder="Prénom NOM — fonction, affiliation (laisser vide si aucun)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🙋</span> Invité·e·s</div>
+      <div class="dyn-list" id="invites-list"></div>
+      <button class="add-btn" onclick="addInvite()">+ Ajouter un·e invité·e</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🚫</span> Absent·e·s excusé·e·s</div>
+      <div class="dyn-list" id="absents-list"></div>
+      <button class="add-btn" onclick="addAbsent()">+ Ajouter un·e absent·e</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo(0)">← Retour</button>
+      <button class="btn btn-primary" onclick="goTo(2)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 2 — Avancement ═══════════ -->
+  <div class="panel" id="panel-2">
+    <p class="section-header">Avancement des travaux <span>étape 3 / 6</span></p>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">📋</span> Ordre du jour</div>
+      <div class="dyn-list" id="odj-list"></div>
+      <button class="add-btn" onclick="addOdj()">+ Ajouter un point</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🔄</span> Rappel de la situation</div>
+      <div class="field">
+        <label>Situation depuis la dernière réunion</label>
+        <textarea id="rappel" placeholder="Où en était le travail à l'issue de la dernière réunion ? (ou indiquer « Première réunion »)"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">✅</span> Travaux réalisés</div>
+      <div class="field">
+        <label>Description des travaux effectués</label>
+        <textarea id="travaux" placeholder="Expériences, analyses, lectures, rédactions…" style="min-height:110px"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">📊</span> Résultats obtenus</div>
+      <div class="field">
+        <label>Résultats significatifs</label>
+        <textarea id="resultats" placeholder="Décrire les résultats, résultats préliminaires, figures importantes…"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">⚠️</span> Difficultés rencontrées</div>
+      <div class="field">
+        <label>Blocages et obstacles</label>
+        <textarea id="difficultes" placeholder="Blocages techniques, méthodologiques, bibliographiques…"></textarea>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo(1)">← Retour</button>
+      <button class="btn btn-primary" onclick="goTo(3)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 3 — Discussions & Décisions ═══════════ -->
+  <div class="panel" id="panel-3">
+    <p class="section-header">Discussions & Décisions <span>étape 4 / 6</span></p>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">💬</span> Points discutés</div>
+      <div class="dyn-list" id="discussions-list"></div>
+      <button class="add-btn" onclick="addDiscussion()">+ Ajouter un point de discussion</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🟢</span> Décisions prises</div>
+      <div class="dyn-list" id="decisions-list"></div>
+      <button class="add-btn" onclick="addDecision()">+ Ajouter une décision</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🟡</span> Remarques importantes</div>
+      <div class="field">
+        <label>Remarques diverses</label>
+        <textarea id="remarques" placeholder="Points soulevés en dehors de l'ordre du jour, notes importantes…"></textarea>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo(2)">← Retour</button>
+      <button class="btn btn-primary" onclick="goTo(4)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 4 — Actions & Suite ═══════════ -->
+  <div class="panel" id="panel-4">
+    <p class="section-header">Actions & Prochaines étapes <span>étape 5 / 6</span></p>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">☑️</span> Tâches à accomplir</div>
+      <div class="dyn-list" id="taches-list"></div>
+      <button class="add-btn" onclick="addTache()">+ Ajouter une tâche</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🎯</span> Objectifs à moyen terme</div>
+      <div class="dyn-list" id="objectifs-list"></div>
+      <button class="add-btn" onclick="addObjectif()">+ Ajouter un objectif</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">📆</span> Échéances importantes</div>
+      <div class="dyn-list" id="echeances-list"></div>
+      <button class="add-btn" onclick="addEcheance()">+ Ajouter une échéance</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🔜</span> Prochaine réunion</div>
+      <div class="grid-3" style="gap:16px">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="dateProchaineReunion">
+        </div>
+        <div class="field">
+          <label>Heure</label>
+          <input type="text" id="heureProchaineReunion" placeholder="Ex. : 10:00">
+        </div>
+        <div class="field">
+          <label>Lieu</label>
+          <input type="text" id="lieuProchaineReunion" placeholder="Salle / lien">
+        </div>
+        <div class="field span3">
+          <label>Points déjà prévus à l'ordre du jour</label>
+          <input type="text" id="pointsProchaine" placeholder="Ex. : Présentation des premiers résultats, revue de littérature…">
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo(3)">← Retour</button>
+      <button class="btn btn-primary" onclick="goTo(5)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 5 — Générer ═══════════ -->
+  <div class="panel" id="panel-5">
+    <p class="section-header">Générer le fichier LaTeX <span>étape 6 / 6</span></p>
+
+    <div class="success-banner">
+      <div class="success-icon">📄</div>
+      <div>
+        <h3>Prêt à générer votre compte-rendu</h3>
+        <p>Cliquez sur le bouton ci-dessous pour télécharger le fichier <code>.tex</code>. Compilez-le ensuite avec <strong>pdflatex</strong> ou <strong>XeLaTeX</strong> (deux passes recommandées).</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-icon">👁️</span> Aperçu du code généré</div>
+      <div class="preview-box" id="preview-code">Cliquez sur « Aperçu » pour afficher le code…</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo(4)">← Retour</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="updatePreview()">👁 Aperçu</button>
+        <button class="btn btn-generate" onclick="downloadTex()">⬇ Télécharger le .tex</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ─────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────
+let currentStep = 0;
+
+function goTo(n) {
+  document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === n));
+  document.querySelectorAll('.step-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === n);
+    if (i < n) t.classList.add('done'); else t.classList.remove('done');
+  });
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 5) updatePreview();
+}
+
+// ─────────────────────────────────────────
+//  DYNAMIC LIST HELPERS
+// ─────────────────────────────────────────
+function makeDynItem(html, removeFn) {
+  const d = document.createElement('div');
+  d.className = 'dyn-item';
+  d.innerHTML = html + `<button class="remove-btn" onclick="this.parentElement.remove()" title="Supprimer">✕</button>`;
+  return d;
+}
+
+// Invités
+function addInvite() {
+  const d = makeDynItem(`
+    <div class="grid-2">
+      <div class="field"><label>Prénom NOM</label><input type="text" class="inv-nom" placeholder="Prénom NOM"></div>
+      <div class="field"><label>Fonction & Affiliation</label><input type="text" class="inv-aff" placeholder="Maître de conférences, Univ. Y"></div>
+    </div>`);
+  document.getElementById('invites-list').appendChild(d);
+}
+
+// Absents
+function addAbsent() {
+  const d = makeDynItem(`<div class="field"><label>Prénom NOM</label><input type="text" class="abs-nom" placeholder="Prénom NOM — rôle"></div>`);
+  document.getElementById('absents-list').appendChild(d);
+}
+
+// Ordre du jour
+function addOdj() {
+  const d = makeDynItem(`<div class="field"><label>Point</label><input type="text" class="odj-item" placeholder="Ex. : Présentation des données préliminaires"></div>`);
+  document.getElementById('odj-list').appendChild(d);
+}
+
+// Discussions
+function addDiscussion() {
+  const d = makeDynItem(`
+    <div class="grid-2">
+      <div class="field"><label>Intitulé du point</label><input type="text" class="disc-titre" placeholder="Titre court"></div>
+      <div class="field span2"><label>Contenu</label><textarea class="disc-contenu" placeholder="Résumé de la discussion…" style="min-height:70px"></textarea></div>
+    </div>`, true);
+  document.getElementById('discussions-list').appendChild(d);
+}
+
+// Décisions
+function addDecision() {
+  const d = makeDynItem(`<div class="field"><label>Décision</label><input type="text" class="dec-item" placeholder="Ex. : Utiliser la méthode X pour l'analyse Y"></div>`);
+  document.getElementById('decisions-list').appendChild(d);
+}
+
+// Tâches
+function addTache() {
+  const d = makeDynItem(`
+    <div class="grid-2">
+      <div class="field"><label>Tâche</label><input type="text" class="tache-desc" placeholder="Description de la tâche"></div>
+      <div class="field"><label>Échéance</label><input type="text" class="tache-date" placeholder="Ex. : 15 janvier 2026"></div>
+    </div>`);
+  document.getElementById('taches-list').appendChild(d);
+}
+
+// Objectifs
+function addObjectif() {
+  const d = makeDynItem(`
+    <div class="grid-2">
+      <div class="field"><label>Objectif</label><input type="text" class="obj-desc" placeholder="Décrire l'objectif"></div>
+      <div class="field"><label>Horizon</label><input type="text" class="obj-horizon" placeholder="Ex. : mars 2026"></div>
+    </div>`);
+  document.getElementById('objectifs-list').appendChild(d);
+}
+
+// Échéances
+function addEcheance() {
+  const d = makeDynItem(`
+    <div class="grid-2">
+      <div class="field"><label>Échéance</label><input type="text" class="ech-desc" placeholder="Ex. : Comité de suivi individuel (CSI)"></div>
+      <div class="field"><label>Date</label><input type="text" class="ech-date" placeholder="Ex. : 30 juin 2026"></div>
+    </div>`);
+  document.getElementById('echeances-list').appendChild(d);
+}
+
+// ─────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return str
+    .replace(/\\/g, '\\textbackslash{}')
+    .replace(/&/g, '\\&')
+    .replace(/%/g, '\\%')
+    .replace(/\$/g, '\\$')
+    .replace(/#/g, '\\#')
+    .replace(/_/g, '\\_')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/~/g, '\\textasciitilde{}')
+    .replace(/\^/g, '\\textasciicircum{}')
+    .replace(/</g, '\\textless{}')
+    .replace(/>/g, '\\textgreater{}');
+}
+
+function escMultiline(str) {
+  if (!str) return '';
+  return str.split('\n').map(l => esc(l)).join('\n\n');
+}
+
+function v(id) { return (document.getElementById(id) || {}).value || ''; }
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  const mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  return `${parseInt(d)} ${mois[parseInt(m)-1]} ${y}`;
+}
+
+function collectList(listId, cls) {
+  return [...document.querySelectorAll(`#${listId} ${cls}`)].map(i => i.value.trim()).filter(Boolean);
+}
+
+// ─────────────────────────────────────────
+//  LATEX GENERATOR
+// ─────────────────────────────────────────
+function buildLatex() {
+  // Meta
+  const nom       = esc(v('nomDoctorant')) || 'Prénom NOM';
+  const titre     = esc(v('titreThese'))   || 'Titre provisoire de la thèse';
+  const ed        = esc(v('ecoleDoctarale')) || 'École doctorale';
+  const labo      = esc(v('laboratoire'))  || 'Laboratoire / Unité de recherche';
+  const annee     = v('anneeThese')        || '1\\textsuperscript{ère}';
+  const dir       = esc(v('directeur'))    || 'Prénom NOM';
+  const codir     = esc(v('codirecteur'))  || '';
+  const num       = esc(v('numeroReunion')) || '1';
+  const date      = fmtDate(v('dateReunion')) ? esc(fmtDate(v('dateReunion'))) : 'JJ mois AAAA';
+  const hdebut    = esc(v('heureDebut'))   || 'HH:MM';
+  const hfin      = esc(v('heureFin'))     || 'HH:MM';
+  const lieu      = esc(v('lieuReunion'))  || 'Salle / Lien visioconférence';
+  const datePR    = fmtDate(v('dateProchaineReunion')) ? esc(fmtDate(v('dateProchaineReunion'))) : 'JJ mois AAAA';
+  const heurePR   = esc(v('heureProchaineReunion')) || 'HH:MM';
+  const lieuPR    = esc(v('lieuProchaineReunion'))  || '';
+  const pptsProch = esc(v('pointsProchaine')) || '';
+
+  // Invités
+  const invItems = [...document.querySelectorAll('#invites-list .dyn-item')].map(d => {
+    const nom = d.querySelector('.inv-nom')?.value.trim() || '';
+    const aff = d.querySelector('.inv-aff')?.value.trim() || '';
+    return nom ? esc(nom) + (aff ? ` (${esc(aff)})` : '') : null;
+  }).filter(Boolean);
+
+  // Absents
+  const absItems = [...document.querySelectorAll('#absents-list .dyn-item')].map(d =>
+    (d.querySelector('.abs-nom')?.value.trim() || '')).filter(Boolean).map(esc);
+
+  // ODJ
+  const odjItems = [...document.querySelectorAll('#odj-list .dyn-item')].map(d =>
+    (d.querySelector('.odj-item')?.value.trim() || '')).filter(Boolean).map(esc);
+
+  // Discussions
+  const discItems = [...document.querySelectorAll('#discussions-list .dyn-item')].map(d => ({
+    titre: esc(d.querySelector('.disc-titre')?.value.trim() || ''),
+    contenu: escMultiline(d.querySelector('.disc-contenu')?.value.trim() || '')
+  })).filter(x => x.titre || x.contenu);
+
+  // Décisions
+  const decItems = [...document.querySelectorAll('#decisions-list .dyn-item')].map(d =>
+    (d.querySelector('.dec-item')?.value.trim() || '')).filter(Boolean).map(esc);
+
+  // Tâches
+  const tacheItems = [...document.querySelectorAll('#taches-list .dyn-item')].map(d => ({
+    desc: esc(d.querySelector('.tache-desc')?.value.trim() || ''),
+    date: esc(d.querySelector('.tache-date')?.value.trim() || '')
+  })).filter(x => x.desc);
+
+  // Objectifs
+  const objItems = [...document.querySelectorAll('#objectifs-list .dyn-item')].map(d => ({
+    desc: esc(d.querySelector('.obj-desc')?.value.trim() || ''),
+    horizon: esc(d.querySelector('.obj-horizon')?.value.trim() || '')
+  })).filter(x => x.desc);
+
+  // Échéances
+  const echItems = [...document.querySelectorAll('#echeances-list .dyn-item')].map(d => ({
+    desc: esc(d.querySelector('.ech-desc')?.value.trim() || ''),
+    date: esc(d.querySelector('.ech-date')?.value.trim() || '')
+  })).filter(x => x.desc);
+
+  // Textes longs
+  const rappel    = escMultiline(v('rappel'));
+  const travaux   = escMultiline(v('travaux'));
+  const resultats = escMultiline(v('resultats'));
+  const diff      = escMultiline(v('difficultes'));
+  const remarques = escMultiline(v('remarques'));
+
+  const placeholder = (txt) => `\\todo{${txt}}`;
+
+  // ── ODJ block
+  const odjBlock = odjItems.length
+    ? odjItems.map((x,i) => `  \\item ${x}`).join('\n')
+    : `  \\item ${placeholder('Premier point prévu')}\n  \\item ${placeholder('Deuxième point prévu')}\n  \\item Divers`;
+
+  // ── Invités block
+  const invLine = invItems.length ? invItems.join(' \\\\\n                           & ') : placeholder('Prénom NOM (Fonction, Affiliation)');
+  const codirLine = codir || placeholder('si applicable');
+  const absLine = absItems.length ? absItems.join(', ') : placeholder('noms');
+
+  // ── Discussions block
+  const discBlock = discItems.length
+    ? discItems.map((d, i) => `\\subsection{${d.titre || placeholder('intitulé')}}\n\n${d.contenu || placeholder('Développer ici le contenu de la discussion.')}`).join('\n\n')
+    : `\\subsection{${placeholder('intitulé du premier point')}}\n\n${placeholder('Développer ici le contenu de la discussion.')}`;
+
+  // ── Décisions block
+  const decBlock = decItems.length
+    ? decItems.map(x => `  \\item ${x}`).join('\n')
+    : `  \\item ${placeholder('Décision 1')}\n  \\item ${placeholder('Décision 2')}`;
+
+  // ── Tâches block
+  const tacheBlock = tacheItems.length
+    ? tacheItems.map(t => `  \\item[\\checkbox] ${t.desc}${t.date ? ` \\hfill \\textit{Échéance : ${t.date}}` : ''}`).join('\n')
+    : `  \\item[\\checkbox] ${placeholder('Tâche 1')} \\hfill \\textit{Échéance : ${placeholder('date')}}`;
+
+  // ── Objectifs block
+  const objBlock = objItems.length
+    ? objItems.map(o => `  \\item ${o.desc}${o.horizon ? ` (horizon ${o.horizon})` : ''}`).join('\n')
+    : `  \\item ${placeholder('Objectif 1')}`;
+
+  // ── Échéances block
+  const echBlock = echItems.length
+    ? echItems.map(e => `  \\item ${e.desc}${e.date ? ` : ${e.date}` : ''}`).join('\n')
+    : `  \\item ${placeholder('Comité de suivi individuel (CSI) : date')}`;
+
+  const prochainPts = pptsProch ? pptsProch : placeholder('Point 1');
+
+  return `% ============================================================
+%  COMPTE-RENDU DE RÉUNION DE THÈSE — Généré automatiquement
+% ============================================================
+\\documentclass[a4paper, 11pt]{article}
+
+% ── Encodage & langue ───────────────────────────────────────
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage[french]{babel}
+
+% ── Mise en page ────────────────────────────────────────────
+\\usepackage[top=2.5cm, bottom=2.5cm, left=2.8cm, right=2.8cm]{geometry}
+\\usepackage{parskip}
+\\setlength{\\parindent}{0pt}
+
+% ── Typographie ─────────────────────────────────────────────
+\\usepackage{lmodern}
+\\usepackage{microtype}
+
+% ── Couleurs & graphiques ───────────────────────────────────
+\\usepackage[dvipsnames]{xcolor}
+\\definecolor{thesisblue}{RGB}{26, 82, 148}
+\\definecolor{lightgray}{RGB}{245, 245, 245}
+\\definecolor{medgray}{RGB}{180, 180, 180}
+\\definecolor{darkgray}{RGB}{80, 80, 80}
+
+% ── En-têtes & pieds de page ────────────────────────────────
+\\usepackage{fancyhdr}
+\\pagestyle{fancy}
+\\fancyhf{}
+\\fancyhead[L]{\\small\\color{darkgray}\\textit{Compte-rendu de réunion --- ${nom}}}
+\\fancyhead[R]{\\small\\color{darkgray}\\textit{${date}}}
+\\fancyfoot[C]{\\small\\color{medgray}\\thepage}
+\\renewcommand{\\headrulewidth}{0.4pt}
+\\renewcommand{\\footrulewidth}{0pt}
+
+% ── Tableaux ────────────────────────────────────────────────
+\\usepackage{booktabs}
+\\usepackage{tabularx}
+\\usepackage{array}
+\\usepackage{colortbl}
+
+% ── Listes ──────────────────────────────────────────────────
+\\usepackage{enumitem}
+\\setlist[itemize]{leftmargin=1.5em, itemsep=2pt, topsep=4pt}
+\\setlist[enumerate]{leftmargin=1.5em, itemsep=2pt, topsep=4pt}
+
+% ── Boîtes ──────────────────────────────────────────────────
+\\usepackage{tcolorbox}
+\\tcbuselibrary{skins, breakable}
+
+\\newtcolorbox{actionbox}{
+  enhanced, breakable,
+  colback=thesisblue!6, colframe=thesisblue, boxrule=0.8pt, arc=4pt,
+  title={\\bfseries\\color{white} Actions \\& Prochaines étapes},
+  fonttitle=\\small, coltitle=white,
+  attach boxed title to top left={yshift=-2mm, xshift=6pt},
+  boxed title style={colback=thesisblue, arc=3pt, boxrule=0pt}
+}
+
+\\newtcolorbox{decisionbox}{
+  enhanced, breakable,
+  colback=ForestGreen!6, colframe=ForestGreen, boxrule=0.8pt, arc=4pt,
+  title={\\bfseries\\color{white} Décisions prises},
+  fonttitle=\\small, coltitle=white,
+  attach boxed title to top left={yshift=-2mm, xshift=6pt},
+  boxed title style={colback=ForestGreen, arc=3pt, boxrule=0pt}
+}
+
+\\newtcolorbox{remarquebox}{
+  enhanced, breakable,
+  colback=Goldenrod!10, colframe=Goldenrod!80!black, boxrule=0.8pt, arc=4pt,
+  title={\\bfseries Remarques importantes},
+  fonttitle=\\small,
+  attach boxed title to top left={yshift=-2mm, xshift=6pt},
+  boxed title style={colback=Goldenrod!80!black, arc=3pt, boxrule=0pt}
+}
+
+% ── Sections personnalisées ─────────────────────────────────
+\\usepackage{titlesec}
+\\titleformat{\\section}{\\large\\bfseries\\color{thesisblue}}{\\thesection.}{0.5em}{}[\\color{thesisblue}\\titlerule]
+\\titlespacing{\\section}{0pt}{14pt}{6pt}
+\\titleformat{\\subsection}{\\normalsize\\bfseries\\color{darkgray}}{\\thesubsection.}{0.5em}{}
+\\titlespacing{\\subsection}{0pt}{10pt}{4pt}
+
+% ── Liens ───────────────────────────────────────────────────
+\\usepackage[colorlinks=true, linkcolor=thesisblue, urlcolor=thesisblue]{hyperref}
+
+% ── Commandes personnalisées ────────────────────────────────
+\\newcommand{\\todo}[1]{\\textcolor{BrickRed}{\\textbf{[À compléter : #1]}}}
+\\newcommand{\\checkbox}{$\\square$\\ }
+
+% ============================================================
+\\begin{document}
+\\thispagestyle{empty}
+
+% ── Bandeau titre ───────────────────────────────────────────
+\\begin{tcolorbox}[
+  enhanced, colback=thesisblue, colframe=thesisblue,
+  arc=6pt, boxrule=0pt, top=10pt, bottom=10pt, left=14pt, right=14pt
+]
+  \\color{white}
+  {\\Large\\bfseries Compte-rendu de réunion de thèse}\\\\[4pt]
+  {\\normalsize Réunion n°${num} --- ${date}}
+\\end{tcolorbox}
+
+\\vspace{10pt}
+
+% ── Informations générales ───────────────────────────────────
+\\begin{tcolorbox}[
+  enhanced, colback=lightgray, colframe=medgray,
+  arc=4pt, boxrule=0.6pt, top=6pt, bottom=6pt, left=10pt, right=10pt
+]
+\\begin{tabularx}{\\linewidth}{@{} l X @{}}
+  \\textbf{Doctorant·e}     & ${nom} \\\\[3pt]
+  \\textbf{Titre de thèse}  & \\textit{${titre}} \\\\[3pt]
+  \\textbf{Année de thèse}  & ${annee} année \\\\[3pt]
+  \\textbf{École doctorale} & ${ed} \\\\[3pt]
+  \\textbf{Laboratoire}     & ${labo} \\\\
+\\end{tabularx}
+\\end{tcolorbox}
+
+\\vspace{8pt}
+
+% ── Participants ─────────────────────────────────────────────
+\\begin{tcolorbox}[
+  enhanced, colback=lightgray, colframe=medgray,
+  arc=4pt, boxrule=0.6pt, top=6pt, bottom=6pt, left=10pt, right=10pt
+]
+\\begin{tabularx}{\\linewidth}{@{} l X @{}}
+  \\textbf{Date \\& heure}         & ${date}, ${hdebut} -- ${hfin} \\\\[3pt]
+  \\textbf{Lieu}                  & ${lieu} \\\\[3pt]
+  \\midrule\\\\[-8pt]
+  \\textbf{Encadrement présent}   & ${dir} \\\\
+                                 & ${codirLine} \\\\[3pt]
+  \\textbf{Invité·e·s}            & ${invLine} \\\\[3pt]
+  \\textbf{Absent·e·s excusé·e·s} & ${absLine} \\\\
+\\end{tabularx}
+\\end{tcolorbox}
+
+\\vspace{14pt}
+
+% ============================================================
+\\section{Ordre du jour}
+
+\\begin{enumerate}
+${odjBlock}
+\\end{enumerate}
+
+% ============================================================
+\\section{Avancement des travaux}
+
+\\subsection{Rappel de la situation depuis la dernière réunion}
+
+${rappel || placeholder('Résumer brièvement la situation à l\'issue de la réunion précédente.')}
+
+\\subsection{Travaux réalisés}
+
+${travaux || placeholder('Décrire les expériences, analyses, lectures ou rédactions effectuées.')}
+
+\\subsection{Résultats obtenus}
+
+${resultats || placeholder('Présenter les résultats significatifs.')}
+
+\\subsection{Difficultés rencontrées}
+
+${diff || placeholder('Lister les blocages techniques, méthodologiques ou bibliographiques.')}
+
+% ============================================================
+\\section{Discussions et échanges}
+
+${discBlock}
+
+% ============================================================
+\\section{Décisions et orientations}
+
+\\begin{decisionbox}
+\\begin{itemize}
+${decBlock}
+\\end{itemize}
+\\end{decisionbox}
+
+% ============================================================
+\\section{Actions \\& Prochaines étapes}
+
+\\begin{actionbox}
+\\textbf{Tâches du doctorant·e d'ici la prochaine réunion :}
+\\begin{itemize}
+${tacheBlock}
+\\end{itemize}
+
+\\medskip
+\\textbf{Objectifs à moyen terme :}
+\\begin{itemize}
+${objBlock}
+\\end{itemize}
+
+\\medskip
+\\textbf{Échéances importantes :}
+\\begin{itemize}
+${echBlock}
+\\end{itemize}
+\\end{actionbox}
+
+% ============================================================
+\\section{Remarques diverses}
+
+\\begin{remarquebox}
+${remarques || placeholder('Aucune remarque particulière.')}
+\\end{remarquebox}
+
+% ============================================================
+\\section{Prochaine réunion}
+
+\\begin{tcolorbox}[
+  enhanced, colback=lightgray, colframe=medgray,
+  arc=4pt, boxrule=0.6pt, top=6pt, bottom=6pt, left=10pt, right=10pt
+]
+\\begin{tabularx}{\\linewidth}{@{} l X @{}}
+  \\textbf{Date \\& heure} & ${datePR}, ${heurePR} \\\\[3pt]
+  \\textbf{Lieu}          & ${lieuPR || placeholder('Salle / lien')} \\\\[3pt]
+  \\textbf{Points prévus} & ${prochainPts} \\\\
+\\end{tabularx}
+\\end{tcolorbox}
+
+% ============================================================
+\\section*{Validation du compte-rendu}
+
+\\vspace{16pt}
+
+\\begin{tabularx}{\\linewidth}{@{} X X @{}}
+  \\textbf{Le·la doctorant·e} & \\textbf{Le·la directeur·rice de thèse} \\\\[30pt]
+  \\rule{5cm}{0.4pt} & \\rule{5cm}{0.4pt} \\\\
+  ${nom} & ${dir} \\\\[6pt]
+  \\textit{Date :} \\rule{2.5cm}{0.4pt} & \\textit{Date :} \\rule{2.5cm}{0.4pt} \\\\
+\\end{tabularx}
+
+\\end{document}
+`;
+}
+
+// ─────────────────────────────────────────
+//  PREVIEW (syntax highlight simple)
+// ─────────────────────────────────────────
+function updatePreview() {
+  const tex = buildLatex();
+  const box = document.getElementById('preview-code');
+  // Simple coloring
+  const highlighted = tex
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/(\\[a-zA-Z@]+)/g, '<span class="cmd">$1</span>')
+    .replace(/(%.+)/g, '<span class="cmt">$1</span>')
+    .replace(/(\{[^{}]{0,60}\})/g, '<span class="arg">$1</span>');
+  box.innerHTML = highlighted;
+}
+
+// ─────────────────────────────────────────
+//  DOWNLOAD
+// ─────────────────────────────────────────
+function downloadTex() {
+  const tex = buildLatex();
+  const blob = new Blob([tex], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const nomDoc = (document.getElementById('nomDoctorant').value || 'these').replace(/\s+/g, '_').toLowerCase();
+  const dateVal = document.getElementById('dateReunion').value || 'date';
+  a.href = url;
+  a.download = `CR_reunion_${nomDoc}_${dateVal}.tex`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─────────────────────────────────────────
+//  INIT — pré-remplir la date du jour
+// ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('dateReunion').value = today;
+  // Ajouter un invité et une tâche par défaut pour guider l'utilisateur
+  addInvite();
+  addOdj();
+  addTache();
+  addDecision();
+});
+</script>
+</body>
+</html>
+`;
